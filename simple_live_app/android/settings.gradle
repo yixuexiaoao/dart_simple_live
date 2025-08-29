@@ -21,10 +21,30 @@ pluginManagement {
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
     id "com.android.application" version "7.3.0" apply false
-    // ↓↓↓↓↓↓ 这里是关键修改点 ↓↓↓↓↓↓
-    // 将 Kotlin 版本从 1.7.10 升级，以解决编译错误。
+    // 保持之前已修复的 Kotlin 版本
     id "org.jetbrains.kotlin.android" version "1.9.22" apply false
-    // ↑↑↑↑↑↑ 这里是关键修改点 ↑↑↑↑↑↑
 }
 
 include ":app"
+
+
+// ↓↓↓↓↓↓ 这里是关键修改点 (在文件底部添加) ↓↓↓↓↓↓
+// 使用 Gradle 的 beforeProject 钩子，在每个子项目配置被解析前，强制注入 Java 编译选项。
+// 这是解决顽固插件编译选项问题的最有效方法。
+gradle.beforeProject { project ->
+    if (project.plugins.hasPlugin("com.android.application") || project.plugins.hasPlugin("com.android.library")) {
+        project.android {
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_1_8
+                targetCompatibility JavaVersion.VERSION_1_8
+            }
+            // 同时确保 Kotlin 插件也使用正确的 JVM target
+            tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+                kotlinOptions {
+                    jvmTarget = "1.8"
+                }
+            }
+        }
+    }
+}
+// ↑↑↑↑↑↑ 这里是关键修改点 ↑↑↑↑↑↑
