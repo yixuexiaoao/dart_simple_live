@@ -31,15 +31,11 @@ jobs:
           echo "keyPassword=${{ secrets.TV_KEY_PASSWORD }}" >> simple_live_tv_app/android/key.properties
           echo "keyAlias=${{ secrets.TV_KEY_ALIAS }}" >> simple_live_tv_app/android/key.properties
 
-      # ↓↓↓↓↓↓ 这里是关键修改点 ↓↓↓↓↓↓
-      # 设置JAVA环境
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          # 将 Java 版本从 17 降至 11，以解决签名打包时的 KeytoolException 错误
-          java-version: "11" 
-          cache: "gradle"
-      # ↑↑↑↑↑↑ 这里是关键修改点 ↑↑↑↑↑↑
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17' # <--- 修改为 17
+        distribution: 'zulu'
     
       #设置Flutter
       - name: Flutter action
