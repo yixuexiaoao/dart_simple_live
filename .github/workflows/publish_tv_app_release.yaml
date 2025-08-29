@@ -1,3 +1,5 @@
+# [修改后] .github/workflows/publish_tv_app_release.yaml
+
 name: app-build-action
 #推送Tag时触发
 on:
@@ -29,12 +31,15 @@ jobs:
           echo "keyPassword=${{ secrets.TV_KEY_PASSWORD }}" >> simple_live_tv_app/android/key.properties
           echo "keyAlias=${{ secrets.TV_KEY_ALIAS }}" >> simple_live_tv_app/android/key.properties
 
+      # ↓↓↓↓↓↓ 这里是关键修改点 ↓↓↓↓↓↓
       # 设置JAVA环境
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: "17"
+          # 将 Java 版本从 17 降至 11，以解决签名打包时的 KeytoolException 错误
+          java-version: "11" 
           cache: "gradle"
+      # ↑↑↑↑↑↑ 这里是关键修改点 ↑↑↑↑↑↑
     
       #设置Flutter
       - name: Flutter action
@@ -55,7 +60,7 @@ jobs:
           cd simple_live_tv_app
           flutter build apk --release --split-per-abi
     
-      #上传APK至Artifacts
+      # ...后续步骤保持不变...
       - name: Upload APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -91,3 +96,4 @@ jobs:
         
       #完成
       - run: echo "🍏 This job's status is ${{ job.status }}."
+
