@@ -1,9 +1,28 @@
+// [修改后] simple_live_tv_app/android/build.gradle
+
+// ↓↓↓↓↓↓ 这里是关键修改点（在文件顶部添加） ↓↓↓↓↓↓
+// 将 allprojects 移至文件顶部，以确保所有项目（主应用和所有插件模块）都应用这些配置
 allprojects {
     repositories {
         google()
         mavenCentral()
     }
+
+    // 新增部分：强制所有子项目的 Java 编译选项
+    // 这会覆盖掉类似 package_info_plus 插件中可能存在的不兼容配置
+    afterEvaluate {
+        if (it.hasProperty('android')) {
+            android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_1_8
+                    targetCompatibility JavaVersion.VERSION_1_8
+                }
+            }
+        }
+    }
 }
+// ↑↑↑↑↑↑ 这里是关键修改点 ↑↑↑↑↑↑
+
 
 rootProject.buildDir = "../build"
 subprojects {
@@ -16,3 +35,4 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
